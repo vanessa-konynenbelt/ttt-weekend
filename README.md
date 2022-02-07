@@ -1,1 +1,1 @@
-# tic-tac-toe starter code
+# Week 2 SEI tic-tac-toe project
