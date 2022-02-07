@@ -12,10 +12,10 @@ const winIdx = [
   [0,4,8]
 ]
 /*-------------------Variables (state) ------------------*/
-let sqrArray = new Array(8).fill(0)
+let sqrArray = null
 let turn = null 
-let winner = [] // X, O, or T
-let count 
+let winner = null // 'X', 'O', or 'T'
+let index = null
 
 /*---------------Cached Element References --------------*/
 let squares = document.querySelectorAll('div')
@@ -31,20 +31,29 @@ reset.addEventListener('click', init)
 init()
 
 function init(){
-  squares.forEach(square => square.textContent = '')
-  turn = 1
+  //clear array
+  sqrArray = new Array(9).fill(null)
+
+  //clear squares of text and styling
+  squares.forEach(square => square.textContent = null)
+  squares.forEach(square => square.removeAttribute('class'))
+
+  //clear message styling
+  gameStatus.style.color = 'black'
+  gameStatus.removeAttribute('class')
+  
+  //set variables & message
   winner = null
+  turn = 1
   gameStatus.textContent = `It's ${turn === 1 ? 'X' : 'O'}'s turn`
-  count = 0
 }
 
 function handleClick(e){
   let sqrIdx = parseInt(e.target.id.replace('sq', ''))
-  sqrArray[sqrIdx] = turn // where is turn being stores in squares[]? node tree not array
+  sqrArray[sqrIdx] = turn 
   renderClick(sqrIdx)
   getWinner()
   renderWinner()
-  count ++
 }
 
 function renderClick(sqrIdx){
@@ -60,48 +69,54 @@ function renderClick(sqrIdx){
   }
 }
 
-function renderWinner(){ //append to render later
-  console.log('you render')
+function renderWinner(){ 
   if(winner === null){ 
       turn *= -1
     }
   if(winner === 'T'){ 
+    //style message
+    gameStatus.classList.add('wobble')
     gameStatus.textContent = "It's a tie!"
+    
+    //style board elements
+    squares.forEach(square => {
+      square.style.color = 'grey'
+    })
     return
   }
   if(winner !== null){
+    //style message
+    gameStatus.classList.add('bounce')
     gameStatus.textContent = turn === 1 ?  `Congrats! X's won!` : `Congrats! O's won!`
+    gameStatus.style.color = turn === 1 ? 'red' : 'blue'
+
+    //style board elements
+    const win = winIdx[index]
+    let time = 300
+    for(let i=0; i<3; i++){
+      setTimeout(function(){
+        squares[win[i]].style.color = 'green'
+      },time)
+      time += 300
+    }
+    confetti.start(2000)
     return
   }
 }
 
 function getWinner(){
-  console.log(`This is the windex ${winIdx[1][0]}`)
-  console.log(`This is the sqarray of windex ${sqrArray[3]}`)
-  console.log(`Does this even work like sqarray of windex ${sqrArray[winIdx[1][0]]}`)
-  
-  for(let i=0; i<winIdx.length; i++){
-    for(let j=0; j<3; j++){
-      let index = winIdx[i][j]
-      console.log(`This is ${index} index`)
-      if(sqrArray[winIdx[i][j]] === sqrArray[winIdx[i][j+1]] === sqrArray[winIdx][i][j+2] === 1 || -1){
-        console.log('holy shit if statement is true')
+  for(var i=0; i<winIdx.length; i++){
+    const win = winIdx[i]
+      let a = sqrArray[win[0]]
+      let b = sqrArray[win[1]]
+      let c = sqrArray[win[2]]
+    if(a === b && b === c && a != null){
         winner = turn === 1  ? 'X' : 'Y'
-        console.log('we have a winnnnner')
-      }else{
-        console.log('hm. disappointing')
-      }
+        index = i
     }
   }
-     
-      
-    
-  
-
-  if(count === 9 &&  winner === null)
+  if(!sqrArray.includes(null) && winner === null)
   {
-    console.log('omg its a tie')
     winner = 'T'
   }
-
 }
